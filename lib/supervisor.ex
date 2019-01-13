@@ -62,7 +62,12 @@ defmodule Cluster.Supervisor do
     for {topology, spec} <- config do
       strategy = Keyword.fetch!(spec, :strategy)
       state = build_initial_state([{:topology, topology} | spec])
-      {strategy, [state]}
+
+      # unique IDs are requred in order to support multiple topologies in libcluster config
+      Supervisor.child_spec(
+        {strategy, [state]},
+        id: :"#{strategy}_#{:erlang.unique_integer()}"
+      )
     end
   end
 
